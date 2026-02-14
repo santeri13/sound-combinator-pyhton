@@ -82,10 +82,7 @@ sudo apt-get install ffmpeg
 ## Commands
 
 - `/soundboard` - Display the interactive soundboard with all available sounds
-- `/playsound <sound>` - Play a specific sound (autocomplete available)
 - `/listsounds` - List all available sounds in your server's soundboard
-- `/stop` - Stop the currently playing sound
-- `/disconnect` - Disconnect the bot from the voice channel
 
 ## Usage
 
