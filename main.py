@@ -26,7 +26,8 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 # Store available soundboard sounds
 available_sounds = {}
-saved_sound_combinations = {}
+global sound_combinations
+sound_combinations = {}
 
 #Database connection (for future persistence, not used in current code)
 conn = sqlite3.connect('soundbar_combinations_db.db')
@@ -48,7 +49,6 @@ async def load_sounds(guild: discord.Guild):
         
         # Store soundboard sounds by name
         for sound in soundboard_sounds:
-            print(sound)
             available_sounds[sound.name] = sound
             logger.info(f"Loaded soundboard sound: {sound.name}")
         
@@ -212,6 +212,7 @@ class SoundboardView(discord.ui.View):
                 if not sound_queues[guild.id]:
                     break
                 next_sound = sound_queues[guild.id].pop(0)
+                print(f"Playing sound {next_sound} from queue for guild {guild.name}")
 
             try:
                 # Play soundboard sound
@@ -231,28 +232,23 @@ class SoundboardView(discord.ui.View):
 class SoundboardCombinationView(discord.ui.View):
     """View for displaying saved combinations"""
     
-    def __init__(self, combination_name: str):
+    def __init__(self):
         super().__init__(timeout=None)
         self.add_sound_buttons()
-        self.combination_name = combination_name
         # In a real implementation, you would load the sounds for this combination and create buttons to play them
 
     def add_sound_buttons(self):
-        for sound_name in list(available_sounds.keys())[:20]:  # leave space for Play button
+        for sound_name in list(sound_combinations.keys())[:20]:  # leave space for Play button
             button = discord.ui.Button(
                 label=sound_name[:80],
-                style=discord.ButtonStyle.primary,
-                emoji=available_sounds[sound_name].emoji if available_sounds[sound_name].emoji else None,
+                style=discord.ButtonStyle.primary
             )
             button.callback = self.play_sound_callback(sound_name)
             self.add_item(button)
     
     def play_sound_callback(self, sound_name: str):
         async def callback(interaction: discord.Interaction):
-            query = "SELECT sound_id FROM sound_combination_sounds WHERE combination_id = (SELECT id FROM sound_combination WHERE server_id = ? AND sound_name = ?)"
-            c.execute(query, (interaction.guild.id, self.combination_name))
-            results = c.fetchall()
-            await self.play_sound(interaction,results)
+            await self.play_sound(interaction, sound_combinations[sound_name])
         return callback
 
     async def play_sound(self, interaction: discord.Interaction, sound_ids: list):
@@ -275,12 +271,12 @@ class SoundboardCombinationView(discord.ui.View):
             return
 
         # Acknowledge immediately
-        await interaction.response.send_message(f"Playing combination **{self.combination_name}**...", ephemeral=True)
+        await interaction.response.send_message(f"Playing combination ...", ephemeral=True)
 
         for sound_id in sound_ids:
             try:
-                # Play soundboard sound by ID
-                await voice_client.channel.send_sound(available_sounds[sound_id[0]])
+                sound = guild.get_soundboard_sound(sound_id)
+                await voice_client.channel.send_sound(sound)
 
                 # Wait until it's finished (soundboard sounds are short, but still)
                 await asyncio.sleep(3.5)  # ← adjust based on average sound length
@@ -470,8 +466,16 @@ async def play_combinations(interaction: discord.Interaction):
     query = "SELECT sound_name FROM sound_combination WHERE server_id = ?"
     c.execute(query, (interaction.guild.id,))
     results = c.fetchall()
+    for row in results:
+        sound_ids=[]
+        query = "SELECT sound_id FROM sound_combination_sounds WHERE combination_id = (SELECT id FROM sound_combination WHERE server_id = ? AND sound_name = ?)"
+        c.execute(query, (interaction.guild.id, row[0]))
+        sound_combination_ids = c.fetchall()
+        for ids in sound_combination_ids:
+            sound_ids.append(ids[0])
+        sound_combinations[row[0]] = sound_ids
 
-    if not results:
+    if not sound_combinations:
         await interaction.response.send_message(
             "❌ No soundboard combinations found in this server.",
             ephemeral=True
@@ -480,15 +484,14 @@ async def play_combinations(interaction: discord.Interaction):
     
     embed = discord.Embed(
         title="🎵 Combinations soundboard",
-        description=f"Available sounds: {len(results)}",
+        description=f"Available sounds: {len(sound_combinations)}",
         color=discord.Color.blue()
     )
     
-    for row in results:
-        sound_name = row[0]
+    for sound_name in list(sound_combinations.keys())[:25]:
         embed.add_field(name=" ", value=f"• {sound_name}", inline=False)
 
-    view = SoundboardView()
+    view = SoundboardCombinationView()
     await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
     
 
