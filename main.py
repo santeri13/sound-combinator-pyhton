@@ -29,7 +29,6 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 # Store available soundboard sounds
 available_sounds = {}
-global sound_combinations
 sound_combinations = {}
 
 #Database connection (for future persistence, not used in current code)
@@ -295,7 +294,7 @@ class DeleteCombinationView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
         self.add_combination_buttons()
-
+        print("DeleteCombinationView initialized with combinations: ", sound_combinations)
     def add_combination_buttons(self):
         for sound_name in list(sound_combinations.keys())[:20]:  # limit to 20 for display
             button = discord.ui.Button(
@@ -507,14 +506,9 @@ async def play_combinations(interaction: discord.Interaction):
     query = "SELECT sound_name FROM sound_combination WHERE server_id = ?"
     c.execute(query, (interaction.guild.id,))
     results = c.fetchall()
-    for row in results:
-        sound_ids=[]
-        query = "SELECT sound_id FROM sound_combination_sounds WHERE combination_id = (SELECT id FROM sound_combination WHERE server_id = ? AND sound_name = ?)"
-        c.execute(query, (interaction.guild.id, row[0]))
-        sound_combination_ids = c.fetchall()
-        for ids in sound_combination_ids:
-            sound_ids.append(ids[0])
-        sound_combinations[row[0]] = sound_ids
+
+    global sound_combinations
+    sound_combinations = fetched_combinations({}, results, c, interaction.guild.id)
 
     if not sound_combinations:
         await interaction.response.send_message(
@@ -548,6 +542,9 @@ async def delete_combinations(interaction: discord.Interaction):
     query = "SELECT sound_name FROM sound_combination WHERE server_id = ?"
     c.execute(query, (interaction.guild.id,))
     results = c.fetchall()
+
+    global sound_combinations
+    sound_combinations = fetched_combinations({}, results, c, interaction.guild.id)
     
     if not results:
         await interaction.response.send_message(
@@ -567,6 +564,17 @@ async def delete_combinations(interaction: discord.Interaction):
     
     view = DeleteCombinationView()
     await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+
+def fetched_combinations(sound_combinations, results, c, server_id):
+    for row in results:
+        sound_ids=[]
+        query = "SELECT sound_id FROM sound_combination_sounds WHERE combination_id = (SELECT id FROM sound_combination WHERE server_id = ? AND sound_name = ?)"
+        c.execute(query, (server_id, row[0]))
+        sound_combination_ids = c.fetchall()
+        for ids in sound_combination_ids:
+            sound_ids.append(ids[0])
+        sound_combinations[row[0]] = sound_ids
+    return sound_combinations
 
 # Run the bot
 def main():
