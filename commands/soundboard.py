@@ -43,9 +43,9 @@ class SoundboardView(discord.ui.View):
         self.add_item(self.create_play_queue_button())
 
     def add_sound_buttons(self):
-        for sound_name in list(available_sounds.keys())[:20]:  # leave space for Play button
+        for sound_name in list(available_sounds.keys()):  # leave space for Play button
             button = discord.ui.Button(
-                label=sound_name[:80],
+                label=sound_name,
                 style=discord.ButtonStyle.primary,
                 emoji=available_sounds[sound_name].emoji if available_sounds[sound_name].emoji else None,
             )
@@ -174,7 +174,7 @@ def setup_soundboard_command(bot, sound_queues, queue_locks):
             color=discord.Color.blue()
         )
         
-        for sound_name in list(available_sounds.keys())[:25]:
+        for sound_name in list(available_sounds.keys()):
             embed.add_field(name=" ", value=f"• {sound_name}", inline=False)
         
         view = SoundboardView(sound_queues, queue_locks)

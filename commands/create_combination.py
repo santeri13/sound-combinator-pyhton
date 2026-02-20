@@ -18,9 +18,9 @@ class SoundboardCreateCombinations(discord.ui.View):
         self.add_item(self.save_combination_button())
 
     def add_sound_buttons(self):
-        for sound_name in list(soundboard.available_sounds.keys())[:20]:  # leave space for Play button
+        for sound_name in list(soundboard.available_sounds.keys()):  # leave space for Play button
             button = discord.ui.Button(
-                label=sound_name[:80],
+                label=sound_name,
                 style=discord.ButtonStyle.primary,
                 emoji=soundboard.available_sounds[sound_name].emoji if soundboard.available_sounds[sound_name].emoji else None,
             )
@@ -125,7 +125,7 @@ def setup_create_combination_command(bot, sound_queues, queue_locks):
             color=discord.Color.blue()
         )
         
-        for sound_name in list(soundboard.available_sounds.keys())[:25]:
+        for sound_name in list(soundboard.available_sounds.keys()):
             embed.add_field(name=" ", value=f"• {sound_name}", inline=False)
         
         view = SoundboardCreateCombinations(sound, sound_queues, queue_locks)

@@ -95,7 +95,7 @@ def setup_play_created_combinations_command(bot):
             color=discord.Color.blue()
         )
         
-        for sound_name in list(sound_combinations.keys())[:25]:
+        for sound_name in list(sound_combinations.keys()):
             embed.add_field(name=" ", value=f"• {sound_name}", inline=False)
 
         view = SoundboardCombinationView(sound_combinations)

@@ -16,7 +16,7 @@ class DeleteCombinationView(discord.ui.View):
         print("DeleteCombinationView initialized with combinations: ", sound_combinations)
 
     def add_combination_buttons(self):
-        for sound_name in list(self.sound_combinations.keys())[:20]:  # limit to 20 for display
+        for sound_name in list(self.sound_combinations.keys()):  # limit to 20 for display
             button = discord.ui.Button(
                 label=sound_name[:80],
                 style=discord.ButtonStyle.danger
