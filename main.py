@@ -4,7 +4,7 @@ import os
 import asyncio
 from dotenv import load_dotenv
 import logging
-import sqlite3
+import psycopg2
 from collections import defaultdict
 
 from keep_alive import keep_alive
@@ -32,7 +32,12 @@ available_sounds = {}
 sound_combinations = {}
 
 #Database connection (for future persistence, not used in current code)
-conn = sqlite3.connect('soundbar_combinations_db.db')
+conn = psycopg2.connect(
+    host=os.getenv("DB_HOST"),
+    database=os.getenv("DB_NAME"),
+    user=os.getenv("DB_USER"),
+    password=os.getenv("DB_PASSWORD")
+)
 c = conn.cursor()
 
 
@@ -117,11 +122,12 @@ class SoundboardCreateCombinations(discord.ui.View):
         guild = interaction.guild
         async with queue_locks[guild.id]:
             try:
-                query = "INSERT INTO sound_combination (server_id, sound_name) VALUES (?, ?) returning id"
-                id = c.execute(query, (guild.id, sound_name)).fetchone()[0]
+                query = "INSERT INTO sound_combination (server_id, sound_name) VALUES (%s, %s) RETURNING id"
+                c.execute(query, (guild.id, sound_name))
+                id = c.fetchone()[0]
                 for sound in sound_queues[guild.id]:
                     c.execute(
-                        "INSERT INTO sound_combination_sounds (combination_id, sound_id) VALUES (?, ?)",
+                        "INSERT INTO sound_combination_sounds (combination_id, sound_id) VALUES (%s, %s)",
                         (id, sound.id)
                     )
                 conn.commit()
@@ -313,11 +319,12 @@ class DeleteCombinationView(discord.ui.View):
         guild = interaction.guild
         try:
             c.execute(
-                "DELETE FROM sound_combination WHERE server_id = ? AND sound_name = ?",
+                "DELETE FROM sound_combination_sounds WHERE combination_id = (SELECT id FROM sound_combination WHERE server_id = %s AND sound_name = %s)",
                 (guild.id, sound_name)
             )
             c.execute(
-                "DELETE FROM sound_combination_sounds WHERE combination_id NOT IN (SELECT id FROM sound_combination)",
+                "DELETE FROM sound_combination WHERE server_id = %s AND sound_name = %s",
+                (guild.id, sound_name)
             )
             conn.commit()
             await interaction.response.send_message(f"Combination **{sound_name}** deleted!", ephemeral=True)
@@ -414,6 +421,14 @@ async def listsounds(interaction: discord.Interaction):
 @discord.app_commands.describe(sound="Name to create soundbar combination")
 async def playsound(interaction: discord.Interaction, sound: str):
     sound_queues[interaction.guild.id] = []
+    c.execute("SELECT sound_name FROM sound_combination WHERE server_id = %s AND sound_name = %s", (interaction.guild.id, sound))
+    result = c.fetchone()
+    if result:
+        await interaction.response.send_message(
+            f"❌ A combination with the name **{sound}** already exists. Please choose a different name.",
+            ephemeral=True
+        )
+        return
     """Show the soundboard with available sounds"""
     if not interaction.guild:
         await interaction.response.send_message(
@@ -459,7 +474,7 @@ async def listsounds(interaction: discord.Interaction):
     
     
     # For demonstration, we will just list the combinations stored in memory
-    query = "SELECT server_id, sound_name FROM sound_combination WHERE server_id = ?"
+    query = "SELECT server_id, sound_name FROM sound_combination WHERE server_id = %s"
     c.execute(query, (interaction.guild.id,))
     results = c.fetchall()
     
@@ -503,7 +518,7 @@ async def play_combinations(interaction: discord.Interaction):
         )
         return
     
-    query = "SELECT sound_name FROM sound_combination WHERE server_id = ?"
+    query = "SELECT sound_name FROM sound_combination WHERE server_id = %s"
     c.execute(query, (interaction.guild.id,))
     results = c.fetchall()
 
@@ -539,7 +554,7 @@ async def delete_combinations(interaction: discord.Interaction):
         )
         return
     
-    query = "SELECT sound_name FROM sound_combination WHERE server_id = ?"
+    query = "SELECT sound_name FROM sound_combination WHERE server_id = %s"
     c.execute(query, (interaction.guild.id,))
     results = c.fetchall()
 
@@ -568,7 +583,7 @@ async def delete_combinations(interaction: discord.Interaction):
 def fetched_combinations(sound_combinations, results, c, server_id):
     for row in results:
         sound_ids=[]
-        query = "SELECT sound_id FROM sound_combination_sounds WHERE combination_id = (SELECT id FROM sound_combination WHERE server_id = ? AND sound_name = ?)"
+        query = "SELECT sound_id FROM sound_combination_sounds WHERE combination_id = (SELECT id FROM sound_combination WHERE server_id = %s AND sound_name = %s)"
         c.execute(query, (server_id, row[0]))
         sound_combination_ids = c.fetchall()
         for ids in sound_combination_ids:
