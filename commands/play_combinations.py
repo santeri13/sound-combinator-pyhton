@@ -13,7 +13,7 @@ class SoundboardCombinationView(discord.ui.View):
         self.add_sound_buttons()
 
     def add_sound_buttons(self):
-        for sound_name in list(self.sound_combinations.keys())[:20]:  # leave space for Play button
+        for sound_name in list(self.sound_combinations.keys()):  # leave space for Play button
             button = discord.ui.Button(
                 label=sound_name[:80],
                 style=discord.ButtonStyle.primary
