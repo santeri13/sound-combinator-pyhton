@@ -81,8 +81,11 @@ sudo apt-get install ffmpeg
 
 ## Commands
 
-- `/soundboard` - Display the interactive soundboard with all available sounds
-- `/listsounds` - List all available sounds in your server's soundboard
+- `/create_combination` - Create a sound combination
+- `/list_combinations` - List your saved combinations
+- `/delete_combinations` - Delete a saved combination
+- `/soundboard` - Show interactive soundboard and combine sound
+- `/listsounds` - List all available sounds
 
 ## Usage
 
@@ -92,12 +95,7 @@ sudo apt-get install ffmpeg
    - Click the button for the sound you want to play
    - The bot will join your voice channel and play the sound
 
-2. **Direct sound playback:**
-   - Join a voice channel
-   - Type `/playsound <sound_name>` (use autocomplete)
-   - The bot will play the sound
-
-3. **Managing server soundboard:**
+2. **Managing server soundboard:**
    - Server soundboard sounds are managed in your server settings
    - The bot will automatically detect and play them
 
@@ -109,7 +107,10 @@ sound combinator python/
 ├── requirements.txt     # Python dependencies
 ├── .env                 # Configuration file (add your token here)
 ├── README.md            # This file
-└── sound_manager.py     # Utility for checking configuration
+├── sound_manager.py     # Utility for checking configuration
+├── legal                # Privacy policy and term of service
+├── keep_alive.py        # Create Flask server which recive ping that Render do not shutdown it 
+└── commands             # Contain commands for bot
 ```
 
 ## Troubleshooting

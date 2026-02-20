@@ -79,11 +79,11 @@ STEP 6: Use Soundboard
    • Or use /playsound <sound_name>
 
 🎯 COMMANDS:
-   /soundboard - Show interactive soundboard
-   /playsound <sound> - Play a specific sound
+   /create_combination - Create a sound combination
+   /list_combinations - List your saved combinations
+   /delete_combinations - Delete a saved combination
+   /soundboard - Show interactive soundboard and combine sound
    /listsounds - List all available sounds
-   /stop - Stop current sound
-   /disconnect - Disconnect bot
 
 📞 NEED HELP?
    Discord.py: https://discordpy.readthedocs.io/
