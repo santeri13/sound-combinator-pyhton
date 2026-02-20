@@ -420,6 +420,7 @@ async def listsounds(interaction: discord.Interaction):
 @bot.tree.command(name="create_combination", description="Play a sound in your voice channel")
 @discord.app_commands.describe(sound="Name to create soundbar combination")
 async def playsound(interaction: discord.Interaction, sound: str):
+    global sound_queues
     sound_queues[interaction.guild.id] = []
     c.execute("SELECT sound_name FROM sound_combination WHERE server_id = %s AND sound_name = %s", (interaction.guild.id, sound))
     result = c.fetchone()
