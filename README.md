@@ -81,7 +81,7 @@ sudo apt-get install ffmpeg
 
 ## Commands
 
-- `/create_combination` - Create a sound combination
+- `/create_combination` - Create a sound combination and save it
 - `/list_combinations` - List your saved combinations
 - `/delete_combinations` - Delete a saved combination
 - `/soundboard` - Show interactive soundboard and combine sound

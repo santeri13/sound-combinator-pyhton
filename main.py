@@ -45,8 +45,8 @@ setup_delete_combinations_command(bot)
 async def on_ready():
     logger.info(f"{bot.user} has connected to Discord!")
     try:
-        synced = await bot.tree.sync()
-        logger.info(f"Synced {len(synced)} command(s)")
+        await bot.tree.sync()
+        logger.info(f"Synced command(s)")
     except Exception as e:
         logger.error(f"Failed to sync commands: {e}")
 
