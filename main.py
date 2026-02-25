@@ -29,6 +29,7 @@ logger = logging.getLogger(__name__)
 intents = discord.Intents.default()
 intents.voice_states = True
 intents.guilds = True
+intents.message_content = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
@@ -39,7 +40,6 @@ setup_create_combination_command(bot, sound_queues, queue_locks)
 setup_list_combinations_command(bot)
 setup_play_created_combinations_command(bot)
 setup_delete_combinations_command(bot)
-
 
 @bot.event
 async def on_ready():
@@ -62,6 +62,15 @@ def main():
     
     bot.run(token)
 
+@bot.tree.command(name="sync", description="Sync commands for this server")
+async def sync(interaction: discord.Interaction):
+    await interaction.response.send_message("Syncing commands...", ephemeral=True)
+    try:
+        await bot.tree.sync()
+        await interaction.followup.send("Commands synced successfully!", ephemeral=True)
+    except Exception as e:
+        logger.error(f"Failed to sync commands: {e}")
+        await interaction.followup.send("Failed to sync commands.", ephemeral=True)
 
 if __name__ == "__main__":
     main()
