@@ -1,12 +1,16 @@
 import discord
+from discord.ext import commands
 from commands import soundboard
 
 
-def setup_sounds_commands(bot):
-    """Register sound-related commands"""
+class SoundsCog(commands.Cog):
+    """Sounds command cog"""
     
-    @bot.tree.command(name="listsounds", description="List all available sounds")
-    async def listsounds(interaction: discord.Interaction):
+    def __init__(self, bot):
+        self.bot = bot
+
+    @discord.app_commands.command(name="listsounds", description="List all available sounds")
+    async def listsounds(self, interaction: discord.Interaction):
         """List all available soundboard sounds"""
         if not interaction.guild:
             await interaction.response.send_message(
@@ -44,5 +48,9 @@ def setup_sounds_commands(bot):
         
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
+
+async def setup(bot):
+    """Setup function called by discord.py when loading the cog"""
+    await bot.add_cog(SoundsCog(bot))
 
 

@@ -1,4 +1,5 @@
 import discord
+from discord.ext import commands
 import logging
 from database import conn, c
 from commands import soundboard
@@ -80,15 +81,18 @@ class SoundboardCreateCombinations(discord.ui.View):
         await interaction.response.send_message(f"Combinations for **{sound_name}** saved!", ephemeral=True)
 
 
-def setup_create_combination_command(bot, sound_queues, queue_locks):
-    """Register the create_combination command"""
+class CreateCombinationCog(commands.Cog):
+    """Create combination command cog"""
     
-    @bot.tree.command(name="create_combination", description="Play a sound in your voice channel")
+    def __init__(self, bot):
+        self.bot = bot
+
+    @discord.app_commands.command(name="create_combination", description="Play a sound in your voice channel")
     @discord.app_commands.describe(sound="Name to create soundbar combination")
-    async def create_combination(interaction: discord.Interaction, sound: str):
+    async def create_combination(self, interaction: discord.Interaction, sound: str):
         from commands.soundboard import load_sounds
         
-        sound_queues[interaction.guild.id] = []
+        self.bot.sound_queues[interaction.guild.id] = []
         c.execute("SELECT sound_name FROM sound_combination WHERE server_id = %s AND sound_name = %s", (interaction.guild.id, sound))
         result = c.fetchone()
         if result:
@@ -128,5 +132,10 @@ def setup_create_combination_command(bot, sound_queues, queue_locks):
         for sound_name in list(soundboard.available_sounds.keys()):
             embed.add_field(name=" ", value=f"• {sound_name}", inline=False)
         
-        view = SoundboardCreateCombinations(sound, sound_queues, queue_locks)
+        view = SoundboardCreateCombinations(sound, self.bot.sound_queues, self.bot.queue_locks)
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+
+
+async def setup(bot):
+    """Setup function called by discord.py when loading the cog"""
+    await bot.add_cog(CreateCombinationCog(bot))

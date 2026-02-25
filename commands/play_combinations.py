@@ -1,4 +1,5 @@
 import discord
+from discord.ext import commands
 import asyncio
 from database import c
 from commands.utils import fetched_combinations
@@ -64,11 +65,14 @@ class SoundboardCombinationView(discord.ui.View):
         await voice_client.disconnect()
 
 
-def setup_play_created_combinations_command(bot):
-    """Register the play_created_combinations command"""
+class PlayCombinationsCog(commands.Cog):
+    """Play combinations command cog"""
     
-    @bot.tree.command(name="play_created_combinations", description="Play createdcombinations for this server")
-    async def play_created_combinations(interaction: discord.Interaction):
+    def __init__(self, bot):
+        self.bot = bot
+
+    @discord.app_commands.command(name="play_created_combinations", description="Play createdcombinations for this server")
+    async def play_created_combinations(self, interaction: discord.Interaction):
         if not interaction.guild:
             await interaction.response.send_message(
                 "❌ This command can only be used in a server.",
@@ -100,3 +104,8 @@ def setup_play_created_combinations_command(bot):
 
         view = SoundboardCombinationView(sound_combinations)
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+
+
+async def setup(bot):
+    """Setup function called by discord.py when loading the cog"""
+    await bot.add_cog(PlayCombinationsCog(bot))

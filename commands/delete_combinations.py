@@ -1,4 +1,5 @@
 import discord
+from discord.ext import commands
 import logging
 from database import conn, c
 from commands.utils import fetched_combinations
@@ -47,11 +48,14 @@ class DeleteCombinationView(discord.ui.View):
             await interaction.response.send_message("Failed to delete combination.", ephemeral=True)
 
 
-def setup_delete_combinations_command(bot):
-    """Register the delete_combinations command"""
+class DeleteCombinationsCog(commands.Cog):
+    """Delete combinations command cog"""
     
-    @bot.tree.command(name="delete_combinations", description="Delete a combination for this server")
-    async def delete_combinations(interaction: discord.Interaction):
+    def __init__(self, bot):
+        self.bot = bot
+
+    @discord.app_commands.command(name="delete_combinations", description="Delete a combination for this server")
+    async def delete_combinations(self, interaction: discord.Interaction):
         if not interaction.guild:
             await interaction.response.send_message(
                 "❌ This command can only be used in a server.",
@@ -83,3 +87,8 @@ def setup_delete_combinations_command(bot):
         
         view = DeleteCombinationView(sound_combinations)
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+
+
+async def setup(bot):
+    """Setup function called by discord.py when loading the cog"""
+    await bot.add_cog(DeleteCombinationsCog(bot))

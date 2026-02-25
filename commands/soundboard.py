@@ -1,4 +1,5 @@
 import discord
+from discord.ext import commands
 import logging
 
 logger = logging.getLogger(__name__)
@@ -142,10 +143,14 @@ class SoundboardView(discord.ui.View):
         await voice_client.disconnect()
 
 
-def setup_soundboard_command(bot, sound_queues, queue_locks):
-    @bot.tree.command(name="soundboard", description="Show the soundboard sounds and add them to a queue and play them")
-    async def soundboard(interaction: discord.Interaction):
-        sound_queues[interaction.guild.id] = []
+class SoundboardCog(commands.Cog):
+    """Soundboard command cog"""
+    
+    def __init__(self, bot):
+        self.bot = bot
+
+    @discord.app_commands.command(name="soundboard", description="Show the soundboard sounds and add them to a queue and play them")
+    async def soundboard(self, interaction: discord.Interaction):
         """Show the soundboard with available sounds"""
         if not interaction.guild:
             await interaction.response.send_message(
@@ -154,6 +159,7 @@ def setup_soundboard_command(bot, sound_queues, queue_locks):
             )
             return
         
+        self.bot.sound_queues[interaction.guild.id] = []
         loaded = await load_sounds(interaction.guild)
         
         if not loaded or not available_sounds:
@@ -177,6 +183,11 @@ def setup_soundboard_command(bot, sound_queues, queue_locks):
         for sound_name in list(available_sounds.keys()):
             embed.add_field(name=" ", value=f"• {sound_name}", inline=False)
         
-        view = SoundboardView(sound_queues, queue_locks)
+        view = SoundboardView(self.bot.sound_queues, self.bot.queue_locks)
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+
+
+async def setup(bot):
+    """Setup function called by discord.py when loading the cog"""
+    await bot.add_cog(SoundboardCog(bot))
 

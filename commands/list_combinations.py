@@ -1,12 +1,16 @@
 import discord
+from discord.ext import commands
 from database import c
 
 
-def setup_list_combinations_command(bot):
-    """Register the list_combinations command"""
+class ListCombinationsCog(commands.Cog):
+    """List combinations command cog"""
     
-    @bot.tree.command(name="list_combinations", description="List all created combinations")
-    async def list_combinations(interaction: discord.Interaction):
+    def __init__(self, bot):
+        self.bot = bot
+
+    @discord.app_commands.command(name="list_combinations", description="List all created combinations")
+    async def list_combinations(self, interaction: discord.Interaction):
         if not interaction.guild:
             await interaction.response.send_message(
                 "❌ This command can only be used in a server.",
@@ -46,3 +50,8 @@ def setup_list_combinations_command(bot):
             )
         
         await interaction.response.send_message(embed=embed, ephemeral=True)
+
+
+async def setup(bot):
+    """Setup function called by discord.py when loading the cog"""
+    await bot.add_cog(ListCombinationsCog(bot))
