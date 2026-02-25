@@ -44,6 +44,19 @@ async def load_cogs():
         except Exception as e:
             logger.error(f"Failed to load cog {cog_name}: {e}")
 
+@bot.tree.command(name="sync", description="Sync slash commands with Discord")
+@discord.app_commands.checks.has_permissions(administrator=True)
+async def sync(interaction: discord.Interaction):
+    """Sync slash commands with Discord"""
+    await interaction.response.defer()
+    try:
+        synced = await bot.tree.sync(guild=interaction.guild)
+        await interaction.followup.send(f"Synced {len(synced)} command(s)")
+        logger.info(f"Synced {len(synced)} command(s)")
+    except Exception as e:
+        await interaction.followup.send(f"Failed to sync commands: {e}")
+        logger.error(f"Failed to sync commands: {e}")
+
 @bot.event
 async def on_ready():
     logger.info(f"{bot.user} has connected to Discord!")
@@ -66,4 +79,5 @@ async def main():
             )
         await bot.start(token)
 
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())
