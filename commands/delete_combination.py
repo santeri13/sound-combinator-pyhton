@@ -54,8 +54,8 @@ class DeleteCombinationsCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @discord.app_commands.command(name="delete_combinations", description="Delete a combination for this server")
-    async def delete_combinations(self, interaction: discord.Interaction):
+    @discord.app_commands.command(name="delete_combination", description="Delete a combination for this server")
+    async def delete_combination(self, interaction: discord.Interaction):
         if not interaction.guild:
             await interaction.response.send_message(
                 "❌ This command can only be used in a server.",

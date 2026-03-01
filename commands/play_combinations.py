@@ -98,9 +98,6 @@ class PlayCombinationsCog(commands.Cog):
             description=f"Available sounds: {len(sound_combinations)}",
             color=discord.Color.blue()
         )
-        
-        for sound_name in list(sound_combinations.keys()):
-            embed.add_field(name=" ", value=f"• {sound_name}", inline=False)
 
         view = SoundboardCombinationView(sound_combinations)
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)

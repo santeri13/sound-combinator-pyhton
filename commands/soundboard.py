@@ -96,6 +96,7 @@ class SoundboardView(discord.ui.View):
                     "You must be in a voice channel (or move the bot first).",
                     ephemeral=True
                 )
+                self.sound_queues.clear()
                 return
 
         voice_client = guild.voice_client
@@ -179,9 +180,6 @@ class SoundboardCog(commands.Cog):
             description=f"Available sounds: {len(available_sounds)}",
             color=discord.Color.blue()
         )
-        
-        for sound_name in list(available_sounds.keys()):
-            embed.add_field(name=" ", value=f"• {sound_name}", inline=False)
         
         view = SoundboardView(self.bot.sound_queues, self.bot.queue_locks)
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
