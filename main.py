@@ -7,12 +7,15 @@ import logging
 from collections import defaultdict
 from pathlib import Path
 
+from keep_alive import keep_alive
+
 sound_queues = defaultdict(list)
 queue_locks  = defaultdict(asyncio.Lock)
 
 # Load environment variables
 load_dotenv()
 
+keep_alive() 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
