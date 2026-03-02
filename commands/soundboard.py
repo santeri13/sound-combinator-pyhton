@@ -6,7 +6,6 @@ logger = logging.getLogger(__name__)
 
 available_sounds = {}
 
-
 async def load_sounds(guild: discord.Guild):
     """Load all soundboard sounds from the guild"""
     global available_sounds
