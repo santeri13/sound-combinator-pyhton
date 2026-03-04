@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands
 import logging
 from database import conn, c
-from commands import soundboard
 
 logger = logging.getLogger(__name__)
 
