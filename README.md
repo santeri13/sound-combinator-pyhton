@@ -14,25 +14,6 @@ A Discord bot that plays your server's native soundboard sounds directly in voic
 
 - Python 3.8 or higher
 - Discord Bot Account
-- FFmpeg installed on your system (required by discord.py for voice)
-
-### Installing FFmpeg
-
-**Windows:**
-```
-choco install ffmpeg
-```
-or download from: https://ffmpeg.org/download.html
-
-**macOS:**
-```
-brew install ffmpeg
-```
-
-**Linux:**
-```
-sudo apt-get install ffmpeg
-```
 
 ## Setup
 
@@ -63,9 +44,10 @@ sudo apt-get install ffmpeg
 
 5. **Add your bot token:**
    - Open `.env` file
-   - Replace `your_bot_token_here` with your bot token:
+   - Replace `your_bot_token_here` and `your_discord_token_here` with your bot token:
      ```
      DISCORD_TOKEN=YOUR_ACTUAL_TOKEN_HERE
+     OWNER_ID=YOUR_DISCORD_ID
      ```
 
 6. **Add soundboard sounds to your server:**
@@ -84,8 +66,9 @@ sudo apt-get install ffmpeg
 - `/create_combination` - Create a sound combination and save it
 - `/list_combinations` - List your saved combinations
 - `/delete_combinations` - Delete a saved combination
+- `/play_created_combinations` - Play created combinations on your server channel
 - `/soundboard` - Show interactive soundboard and combine sound
-- `/listsounds` - List all available sounds
+- `/sync` - Only for bot owner, sync commands globaly
 
 ## Usage
 
@@ -124,10 +107,6 @@ sound combinator python/
 - Make sure you've added sounds to your server's soundboard in server settings
 - Run `/listsounds` to verify the bot can see them
 - Check the bot has permission to read messages
-
-**FFmpeg errors:**
-- Make sure FFmpeg is properly installed and added to your system PATH
-- Test: Open CMD and type `ffmpeg -version`
 
 **Sound plays but no audio:**
 - Check your server's soundboard sounds are valid
