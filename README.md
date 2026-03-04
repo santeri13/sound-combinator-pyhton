@@ -44,7 +44,7 @@ A Discord bot that plays your server's native soundboard sounds directly in voic
 
 5. **Add your bot token:**
    - Open `.env` file
-   - Replace `your_bot_token_here` and `your_discord_token_here` with your bot token:
+   - Replace Discord bot token with your bot token and your Discord user id with your user id:
      ```
      DISCORD_TOKEN=YOUR_ACTUAL_TOKEN_HERE
      OWNER_ID=YOUR_DISCORD_ID
